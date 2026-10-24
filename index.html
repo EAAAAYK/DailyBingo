@@ -2,8 +2,8 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>日課ビンゴ ＆ 青空文庫（お試し版）</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>日課ビンゴ ＆ 青空文庫</title>
     <style>
       :root {
         --ink: #242c28;
@@ -27,6 +27,7 @@
           "Yu Gothic",
           Meiryo,
           sans-serif;
+        overflow-x: hidden;
       }
       button,
       input,
@@ -39,14 +40,15 @@
       .wrap {
         max-width: 1240px;
         margin: auto;
-        padding: 30px 22px 58px;
+        padding: 26px 20px 58px;
       }
       .top {
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
-        gap: 18px;
-        margin-bottom: 22px;
+        gap: 16px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
       }
       .eyebrow {
         color: var(--green);
@@ -55,13 +57,14 @@
         font-weight: 700;
       }
       .top h1 {
-        font-size: clamp(27px, 4vw, 40px);
+        font-size: clamp(24px, 4vw, 38px);
         letter-spacing: 0.04em;
-        margin: 7px 0;
+        margin: 6px 0;
+        line-height: 1.25;
       }
       .date {
         color: var(--muted);
-        font-size: 14px;
+        font-size: 13px;
       }
       .tags {
         display: flex;
@@ -71,7 +74,7 @@
       }
       .tag {
         font-size: 12px;
-        padding: 7px 11px;
+        padding: 6px 11px;
         background: #eef1e8;
         border-radius: 999px;
         color: var(--green);
@@ -82,12 +85,39 @@
         color: #37533c;
         font-weight: 600;
       }
+      .page-nav {
+        display: flex;
+        gap: 6px;
+        margin: 0 0 18px;
+        padding: 5px;
+        background: #ebe8dd;
+        border-radius: 13px;
+        width: max-content;
+        max-width: 100%;
+      }
+      .page-tab {
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--muted);
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.18s ease;
+      }
+      .page-tab.active {
+        background: var(--card);
+        color: var(--green);
+        box-shadow: 0 2px 8px #453c2512;
+        font-weight: 700;
+      }
       .panel {
         background: var(--card);
         border: 1px solid var(--line);
         border-radius: 18px;
         padding: 21px;
         box-shadow: 0 5px 20px #453c2510;
+        margin-bottom: 18px;
       }
       .panelhead {
         display: flex;
@@ -95,6 +125,7 @@
         align-items: center;
         gap: 12px;
         margin-bottom: 14px;
+        flex-wrap: wrap;
       }
       .panel h2 {
         font-size: 18px;
@@ -105,6 +136,7 @@
         font-size: 12px;
         color: var(--muted);
         margin-top: 5px;
+        line-height: 1.45;
       }
       .boards {
         display: grid;
@@ -150,6 +182,7 @@
         padding: 10px 9px;
         text-align: left;
         transition: 0.18s;
+        word-break: break-word;
       }
       .cell:hover {
         transform: translateY(-2px);
@@ -166,6 +199,7 @@
         top: 5px;
         color: var(--green);
         opacity: 0;
+        font-weight: bold;
       }
       .done .check {
         opacity: 1;
@@ -192,7 +226,7 @@
       .btn {
         border: 0;
         border-radius: 9px;
-        padding: 9px 12px;
+        padding: 9px 13px;
         background: var(--green);
         color: #fff;
         font-size: 12px;
@@ -200,6 +234,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        white-space: nowrap;
       }
       .btn:hover {
         opacity: 0.92;
@@ -233,7 +268,9 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 8px;
         font-size: 13px;
+        flex-wrap: wrap;
       }
       .bar {
         height: 8px;
@@ -282,6 +319,253 @@
         font-size: 10px;
         color: var(--muted);
       }
+      .calendar-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+      }
+      .calendar-controls .btn {
+        min-width: 34px;
+        padding: 6px 10px;
+      }
+      .calendar-summary {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 5px;
+      }
+      .calendar-weekday {
+        text-align: center;
+        font-size: 10px;
+        color: var(--muted);
+        padding: 4px 0;
+      }
+      .calendar-day,
+      .calendar-empty {
+        min-height: 54px;
+        border-radius: 9px;
+      }
+      .calendar-day {
+        border: 1px solid var(--line);
+        background: #f4f2eb;
+        color: var(--ink);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 6px 5px;
+        font-size: 11px;
+        overflow: hidden;
+      }
+      .calendar-day .day-rate {
+        font-size: 9px;
+        color: var(--muted);
+        align-self: flex-end;
+      }
+      .calendar-day.intensity-1 {
+        background: #edf1e8;
+      }
+      .calendar-day.intensity-2 {
+        background: #dce7d6;
+      }
+      .calendar-day.intensity-3 {
+        background: #c6d8bd;
+      }
+      .calendar-day.intensity-4 {
+        background: #9fb995;
+        color: #243428;
+      }
+      .calendar-day.bingo-day {
+        border: 2px solid var(--gold);
+      }
+      .calendar-day.today-date {
+        box-shadow: inset 0 0 0 2px var(--green);
+      }
+      .dash-range {
+        font-size: 12px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .dash-range select {
+        margin-left: 5px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 6px 8px;
+        background: #fffdf7;
+        color: var(--ink);
+      }
+      .dash-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 9px;
+        margin: 4px 0 16px;
+      }
+      .dash-stat {
+        background: #f7f5ed;
+        border-radius: 12px;
+        padding: 12px 10px;
+      }
+      .dash-stat strong {
+        display: block;
+        font-size: 22px;
+        color: var(--green);
+        line-height: 1.2;
+      }
+      .dash-stat span,
+      .dash-label,
+      .dash-caption {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .dash-columns {
+        display: grid;
+        grid-template-columns: 1.3fr 0.7fr;
+        gap: 18px;
+      }
+      .dash-label {
+        font-weight: 700;
+        margin-bottom: 9px;
+      }
+      .dash-chart {
+        height: 140px;
+        display: flex;
+        align-items: stretch;
+        gap: 3px;
+        padding: 8px 3px 0;
+        border-bottom: 1px solid var(--line);
+        overflow: hidden;
+      }
+      .dash-day {
+        flex: 1;
+        min-width: 3px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        position: relative;
+      }
+      .dash-bar {
+        width: min(100%, 20px);
+        min-width: 3px;
+        border-radius: 4px 4px 0 0;
+        background: #8ca17d;
+        min-height: 2px;
+      }
+      .dash-bar.has-bingo {
+        background: var(--gold);
+      }
+      .dash-items {
+        display: grid;
+        gap: 9px;
+      }
+      .dash-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 3px 8px;
+        font-size: 11px;
+      }
+      .dash-item-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .dash-item-count {
+        color: var(--muted);
+      }
+      .dash-item-track {
+        grid-column: 1/-1;
+        height: 5px;
+        background: #eeeade;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .dash-item-fill {
+        height: 100%;
+        background: #8ca17d;
+        border-radius: 8px;
+      }
+      .dash-caption {
+        margin-top: 7px;
+      }
+      .points-chart {
+        height: 125px;
+        display: flex;
+        align-items: stretch;
+        gap: 2px;
+        padding: 8px 2px 0;
+        border-bottom: 1px solid var(--line);
+        overflow: hidden;
+      }
+      .points-day {
+        flex: 1;
+        min-width: 3px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 1px;
+      }
+      .point-bar {
+        width: 46%;
+        max-width: 12px;
+        min-width: 2px;
+        border-radius: 3px 3px 0 0;
+        min-height: 1px;
+      }
+      .point-bar.earned-bar {
+        background: #8ca17d;
+      }
+      .point-bar.spent-bar {
+        background: var(--gold);
+      }
+      .points-legend {
+        display: flex;
+        gap: 14px;
+        font-size: 11px;
+        color: var(--muted);
+        margin: 8px 0 14px;
+      }
+      .points-legend span {
+        display: inline-flex;
+        align-items: center;
+      }
+      .points-legend i {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        margin-right: 5px;
+      }
+      .earned-key {
+        background: #8ca17d;
+      }
+      .spent-key {
+        background: var(--gold);
+      }
+      .history-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-top: 8px;
+      }
+      table {
+        width: 100%;
+        min-width: 520px;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      th,
+      td {
+        padding: 9px;
+        border-bottom: 1px solid var(--line);
+      }
+      th {
+        text-align: left;
+        white-space: nowrap;
+      }
       .quote-head {
         display: flex;
         align-items: center;
@@ -317,160 +601,11 @@
         margin-top: 9px;
         min-height: 17px;
       }
-      .dashboard {
-        margin: 0;
-      }
-      .dash-range {
-        font-size: 12px;
-        color: var(--muted);
-        white-space: nowrap;
-      }
-      .dash-range select {
-        margin-left: 5px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        padding: 7px;
-        background: #fffdf7;
-        color: var(--ink);
-      }
-      .dash-stats {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 9px;
-        margin: 4px 0 18px;
-      }
-      .dash-stat {
-        background: #f7f5ed;
-        border-radius: 12px;
-        padding: 13px;
-      }
-      .dash-stat strong {
-        display: block;
-        font-size: 24px;
-        color: var(--green);
-      }
-      .dash-stat span,
-      .dash-label,
-      .dash-caption {
-        font-size: 11px;
-        color: var(--muted);
-      }
-      .dash-columns {
-        display: grid;
-        grid-template-columns: 1.3fr 0.7fr;
-        gap: 20px;
-      }
-      .dash-label {
-        font-weight: 700;
-        margin-bottom: 10px;
-      }
-      .dash-chart {
-        height: 148px;
-        display: flex;
-        align-items: stretch;
-        gap: 3px;
-        padding: 8px 3px 0;
-        border-bottom: 1px solid var(--line);
-        overflow: hidden;
-      }
-      .dash-day {
-        flex: 1;
-        min-width: 3px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        align-items: center;
-        position: relative;
-      }
-      .dash-bar {
-        width: min(100%, 20px);
-        min-width: 3px;
-        border-radius: 4px 4px 0 0;
-        background: #8ca17d;
-        min-height: 2px;
-      }
-      .dash-bar.has-bingo {
-        background: var(--gold);
-      }
-      .dash-day:hover .dash-bar {
-        filter: brightness(0.9);
-      }
-      .dash-day[title] {
-        cursor: help;
-      }
-      .dash-items {
-        display: grid;
-        gap: 9px;
-      }
-      .dash-item {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 3px 8px;
-        font-size: 11px;
-      }
-      .dash-item-name {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .dash-item-count {
-        color: var(--muted);
-      }
-      .dash-item-track {
-        grid-column: 1/-1;
-        height: 5px;
-        background: #eeeade;
-        border-radius: 8px;
-        overflow: hidden;
-      }
-      .dash-item-fill {
-        height: 100%;
-        background: #8ca17d;
-        border-radius: 8px;
-      }
-      .dash-caption {
-        margin-top: 7px;
-      }
-      @media (max-width: 700px) {
-        .dash-columns {
-          grid-template-columns: 1fr;
-          gap: 17px;
-        }
-        .dash-chart {
-          height: 125px;
-        }
-        .dash-stats {
-          gap: 6px;
-        }
-        .dash-stat {
-          padding: 10px;
-        }
-        .dash-stat strong {
-          font-size: 21px;
-        }
-      }
-      .history-wrap {
-        overflow-x: auto;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 12px;
-      }
-      th,
-      td {
-        padding: 9px;
-        border-bottom: 1px solid var(--line);
-      }
-      th {
-        text-align: left;
-        white-space: nowrap;
-      }
       .footer {
         text-align: center;
         font-size: 11px;
         color: #929184;
-        margin-top: 20px;
+        margin-top: 24px;
       }
       .toast {
         position: fixed;
@@ -480,89 +615,218 @@
         opacity: 0;
         background: #29382d;
         color: #fff;
-        padding: 11px 17px;
+        padding: 11px 18px;
         border-radius: 999px;
         font-size: 13px;
         transition: 0.25s;
         pointer-events: none;
         z-index: 9999;
+        white-space: nowrap;
       }
       .toast.show {
         opacity: 1;
         transform: translate(-50%, 0);
       }
-      #taskInputs {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 7px;
-        max-height: 62vh;
-        overflow: auto;
-        padding: 4px;
-      }
+
+      /* モーダルダイアログのスマホ対応・はみ出し防止 */
       dialog {
         border: 1px solid var(--line);
-        border-radius: 16px;
-        width: min(780px, 94vw);
+        border-radius: 18px;
+        width: min(680px, calc(100vw - 24px));
+        max-height: 88vh;
+        margin: auto;
+        padding: 22px 20px;
         background: var(--card);
         color: var(--ink);
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.22);
       }
       dialog::backdrop {
-        background: #18221d77;
+        background: rgba(24, 34, 29, 0.65);
+        backdrop-filter: blur(2px);
       }
-      .dialog-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 14px;
+      dialog h2 {
+        font-size: 18px;
+        margin: 0 0 6px;
       }
       .dialog-note {
         font-size: 11px;
         color: var(--muted);
+        line-height: 1.5;
+        margin: 0 0 10px;
       }
+      #taskInputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        max-height: 56vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 4px 2px;
+        margin-bottom: 16px;
+      }
+      #taskInputs label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+        min-width: 0;
+      }
+      #taskInputs input {
+        flex: 1;
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: #fff;
+        color: var(--ink);
+        font-size: 13px;
+      }
+      .dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        margin-top: 14px;
+        flex-wrap: wrap;
+      }
+      #rewardInputs {
+        max-height: 54vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 2px;
+      }
+
+      /* 画面タブ切り替え制御（今日 vs 記録・ふりかえり） */
+      body[data-page="today"] .view-records {
+        display: none !important;
+      }
+      body[data-page="records"] .view-today {
+        display: none !important;
+      }
+      body[data-page="records"] .layout {
+        display: block;
+      }
+      body[data-page="records"] .layout .side {
+        display: contents;
+      }
+
+      /* レスポンシブ＆スマホ表示対応（はみ出し防止） */
       @media (max-width: 850px) {
         .boards,
         .layout {
           grid-template-columns: 1fr;
         }
         .wrap {
-          padding: 22px 13px 44px;
+          padding: 18px 14px 44px;
         }
         .panel {
-          padding: 16px;
+          padding: 16px 14px;
+          border-radius: 15px;
         }
         .board {
           padding: 12px;
         }
-        .cell {
-          min-height: 72px;
-          padding: 9px 7px;
-        }
         .stats {
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: repeat(3, 1fr);
         }
         .top {
           align-items: flex-start;
           flex-direction: column;
+          gap: 12px;
         }
       }
-      @media (max-width: 420px) {
-        .grid {
+
+      @media (max-width: 640px) {
+        .page-nav {
+          width: 100%;
+        }
+        .page-tab {
+          flex: 1;
+          text-align: center;
+          padding: 9px 8px;
+          font-size: 12px;
+        }
+        /* スマホでは日課編集モーダルを必ず1列にしてはみ出しを防ぐ */
+        #taskInputs {
+          grid-template-columns: 1fr;
+          max-height: 52vh;
+        }
+        dialog {
+          padding: 18px 14px;
+          width: calc(100vw - 20px);
+          border-radius: 14px;
+        }
+        .dialog-actions {
+          justify-content: stretch;
+        }
+        .dialog-actions .btn {
+          flex: 1;
+        }
+        .dash-columns {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .dash-stats {
+          gap: 6px;
+        }
+        .dash-stat {
+          padding: 10px 8px;
+        }
+        .dash-stat strong {
+          font-size: 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .stats {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 6px;
+        }
+        .stat {
+          padding: 9px;
+        }
+        .stat strong {
+          font-size: 17px;
+        }
+        .grid.four {
           gap: 5px;
+        }
+        .grid.three {
+          gap: 6px;
         }
         .cell {
           min-height: 68px;
-          padding: 7px 5px;
+          padding: 8px 6px;
+          border-radius: 9px;
         }
         .label {
           font-size: 11px;
+          line-height: 1.35;
         }
         .pts {
+          font-size: 8px;
+          margin-top: 5px;
+        }
+        .calendar-grid {
+          gap: 3px;
+        }
+        .calendar-day,
+        .calendar-empty {
+          min-height: 44px;
+          border-radius: 6px;
+        }
+        .calendar-day {
+          padding: 3px 2px;
+          font-size: 10px;
+        }
+        .calendar-day .day-rate {
           font-size: 8px;
         }
       }
     </style>
   </head>
-  <body>
+  <body data-page="today">
     <main class="wrap">
       <header class="top">
         <div>
@@ -575,7 +839,27 @@
           <span class="tag">自分のペースで、ひとつずつ。</span>
         </div>
       </header>
-      <section class="panel">
+
+      <!-- 画面切り替えタブ（今日 vs 記録・ふりかえり） -->
+      <nav class="page-nav" aria-label="画面切り替え">
+        <button
+          class="page-tab active"
+          data-page-target="today"
+          aria-pressed="true"
+        >
+          今日
+        </button>
+        <button
+          class="page-tab"
+          data-page-target="records"
+          aria-pressed="false"
+        >
+          記録・ふりかえり
+        </button>
+      </nav>
+
+      <!-- 【今日タブ】今日のビンゴ盤面 -->
+      <section class="panel view-today bingo-panel">
         <div class="panelhead">
           <div>
             <h2>今日のビンゴ</h2>
@@ -616,14 +900,64 @@
           </div>
           <div class="bar"><div class="fill" id="fill"></div></div>
           <small id="rewardCaption"></small>
-          <button class="btn ghost" id="rewardManage">
+          <button class="btn ghost" id="rewardManage" style="margin-top: 4px">
             ご褒美リストを編集
           </button>
         </div>
       </section>
+
+      <!-- 【記録・ふりかえりタブ】この頃のハイライト -->
+      <section class="panel view-records dashboard-panel">
+        <div class="panelhead">
+          <div>
+            <h2>この頃のハイライト</h2>
+            <div class="sub">
+              保存された日々の記録から、最近の積み重ねを集計します。
+            </div>
+          </div>
+          <label class="dash-range"
+            >期間
+            <select id="dashRange">
+              <option value="7">7日</option>
+              <option value="30" selected>30日</option>
+              <option value="90">90日</option>
+            </select></label
+          >
+        </div>
+        <div class="dash-stats">
+          <div class="dash-stat">
+            <strong id="dashBingoDays">0</strong><span>ビンゴした日</span>
+          </div>
+          <div class="dash-stat">
+            <strong id="dashLines">0</strong><span>そろえた列</span>
+          </div>
+          <div class="dash-stat">
+            <strong id="dashChecks">0</strong><span>日課チェック合計</span>
+          </div>
+        </div>
+        <div class="dash-columns">
+          <div>
+            <div class="dash-label">日ごとのビンゴ列数</div>
+            <div
+              id="dashChart"
+              class="dash-chart"
+              role="img"
+              aria-label="日ごとのビンゴ列数グラフ"
+            ></div>
+            <div class="dash-caption" id="dashChartCaption"></div>
+          </div>
+          <div>
+            <div class="dash-label">よく達成した日課 TOP 5</div>
+            <div id="dashItems" class="dash-items"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- メインレイアウト -->
       <div class="layout">
         <div class="side">
-          <section class="panel">
+          <!-- 【今日タブ】今日の達成状況 -->
+          <section class="panel view-today today-stats-panel">
             <div class="panelhead">
               <div>
                 <h2>今日の達成状況</h2>
@@ -653,52 +987,88 @@
               </div>
             </div>
           </section>
-          <section class="panel dashboard">
+
+          <!-- 【記録タブ】今月のカレンダー -->
+          <section class="panel view-records calendar-panel">
             <div class="panelhead">
               <div>
-                <h2>この頃のハイライト</h2>
+                <h2>今月のカレンダー</h2>
                 <div class="sub">
-                  保存された日々の記録から、最近の積み重ねを集計します。
+                  色が濃いほど達成率が高め。金色の枠はビンゴした日です。
                 </div>
               </div>
-              <label class="dash-range"
-                >期間
-                <select id="dashRange">
-                  <option value="7">7日</option>
-                  <option value="30" selected>30日</option>
-                  <option value="90">90日</option>
-                </select></label
-              >
+              <div class="calendar-controls">
+                <button
+                  class="btn secondary"
+                  id="calendarPrev"
+                  aria-label="前の月"
+                >
+                  ‹
+                </button>
+                <strong id="calendarMonth"></strong>
+                <button
+                  class="btn secondary"
+                  id="calendarNext"
+                  aria-label="次の月"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+            <div class="calendar-summary" id="calendarSummary"></div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+          </section>
+
+          <!-- 【記録タブ】ポイントの記録 -->
+          <section class="panel view-records points-panel">
+            <div class="panelhead">
+              <div>
+                <h2>ポイントの記録</h2>
+                <div class="sub">
+                  列達成で獲得したポイントと、ご褒美に使ったポイント。
+                </div>
+              </div>
             </div>
             <div class="dash-stats">
               <div class="dash-stat">
-                <strong id="dashBingoDays">0</strong><span>ビンゴした日</span>
+                <strong id="pointsEarnedAll">0</strong><span>累計獲得 pt</span>
               </div>
               <div class="dash-stat">
-                <strong id="dashLines">0</strong><span>そろえた列</span>
+                <strong id="pointsSpentAll">0</strong><span>累計使用 pt</span>
               </div>
               <div class="dash-stat">
-                <strong id="dashChecks">0</strong><span>日課チェック合計</span>
+                <strong id="pointsBalanceAll">0</strong><span>使用可能 pt</span>
               </div>
             </div>
-            <div class="dash-columns">
-              <div class="dash-chart-wrap">
-                <div class="dash-label">日ごとのビンゴ列数</div>
-                <div
-                  id="dashChart"
-                  class="dash-chart"
-                  role="img"
-                  aria-label="日ごとのビンゴ列数グラフ"
-                ></div>
-                <div class="dash-caption" id="dashChartCaption"></div>
-              </div>
-              <div>
-                <div class="dash-label">よく達成した日課 TOP 5</div>
-                <div id="dashItems" class="dash-items"></div>
-              </div>
+            <div class="dash-label">日ごとの獲得・使用（直近30日）</div>
+            <div
+              class="points-chart"
+              id="pointsChart"
+              role="img"
+              aria-label="日ごとの獲得と使用ポイント"
+            ></div>
+            <div class="points-legend">
+              <span><i class="earned-key"></i>獲得</span>
+              <span><i class="spent-key"></i>使用</span>
+            </div>
+            <div class="history-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>日付</th>
+                    <th>獲得</th>
+                    <th>使用</th>
+                    <th>残高</th>
+                    <th>交換内容</th>
+                  </tr>
+                </thead>
+                <tbody id="pointsHistoryRows"></tbody>
+              </table>
             </div>
           </section>
-          <section class="panel">
+
+          <!-- 【記録タブ】日々の記録 -->
+          <section class="panel view-records history-panel">
             <div class="panelhead">
               <div>
                 <h2>日々の記録</h2>
@@ -736,7 +1106,9 @@
             </div>
           </section>
         </div>
-        <aside class="panel">
+
+        <!-- 【今日タブ】青空文庫から今日の3文 -->
+        <aside class="panel view-today quote-panel">
           <div class="panelhead">
             <div>
               <div class="quote-head">
@@ -752,25 +1124,28 @@
           <div class="hint quote-status" id="quoteStatus"></div>
         </aside>
       </div>
+
       <div class="footer">小さな達成も、拾った言葉も、ここに残していこう。</div>
     </main>
+
     <div class="toast" id="toast"></div>
+
+    <!-- 日課編集モーダル -->
     <dialog id="editDialog">
       <form method="dialog">
         <h2>日課25項目を編集</h2>
         <p class="dialog-note">
-          1〜16番が4×4、17〜25番が3×3に入ります。変更は次の日のカードから反映します。
+          日課25項目を編集できます。内容の変更は次の日のカードから反映され、カードでは全項目がランダムに配置されます。
         </p>
         <div id="taskInputs"></div>
         <div class="dialog-actions">
-          <span class="dialog-note">項目番号はカードの組分けに使います。</span>
-          <div>
-            <button class="btn secondary" value="cancel">キャンセル</button>
-            <button class="btn" id="saveTasks" value="save">保存</button>
-          </div>
+          <button class="btn secondary" value="cancel">キャンセル</button>
+          <button class="btn" id="saveTasks" value="save">保存</button>
         </div>
       </form>
     </dialog>
+
+    <!-- ご褒美編集モーダル -->
     <dialog id="rewardDialog">
       <form method="dialog">
         <h2>ご褒美リスト</h2>
@@ -779,14 +1154,12 @@
         </p>
         <div id="rewardInputs"></div>
         <div class="dialog-actions">
-          <span class="dialog-note">削除しても過去の交換記録は残ります。</span>
-          <div>
-            <button class="btn secondary" value="cancel">閉じる</button>
-            <button class="btn" id="saveRewards" value="save">保存</button>
-          </div>
+          <button class="btn secondary" value="cancel">閉じる</button>
+          <button class="btn" id="saveRewards" value="save">保存</button>
         </div>
       </form>
     </dialog>
+
     <script>
       const defaults = [
         "朝、窓を開ける",
@@ -1277,9 +1650,14 @@
         document.querySelector("#quoteStatus").textContent = "";
       }
 
+      function allRecords() {
+        return Object.assign({}, state.history, {
+          [state.today.date]: snapshot(state.today),
+        });
+      }
+
       function renderHistory() {
-        const all = Object.assign({}, state.history);
-        all[state.today.date] = snapshot(state.today);
+        const all = allRecords();
         const rows = Object.values(all).sort((a, b) =>
             b.date.localeCompare(a.date),
           ),
@@ -1304,7 +1682,7 @@
           cells.forEach((v, i) => {
             const td = document.createElement("td");
             td.textContent = v;
-            if (i === 5) td.style.minWidth = "180px";
+            if (i === 6) td.style.minWidth = "180px";
             tr.appendChild(td);
           });
           tbody.appendChild(tr);
@@ -1312,20 +1690,15 @@
       }
 
       function renderDashboard() {
-        const span = Number(document.querySelector("#dashRange")?.value) || 30,
+        const span = Number(document.querySelector("#dashRange").value) || 30,
           today = new Date(dateKey() + "T00:00:00+09:00"),
           start = new Date(today);
         start.setDate(start.getDate() - span + 1);
-        const days = Object.values(
-          Object.assign({}, state.history, {
-            [state.today.date]: snapshot(state.today),
-          }),
-        )
-          .filter((d) => {
+        const all = allRecords(),
+          days = Object.values(all).filter((d) => {
             const t = new Date(d.date + "T00:00:00+09:00");
             return t >= start && t <= today;
-          })
-          .sort((a, b) => a.date.localeCompare(b.date));
+          });
         let lines = 0,
           checks = 0,
           bingoDays = 0;
@@ -1335,7 +1708,7 @@
             done = Array.isArray(d.done) ? d.done : [],
             n = Array.isArray(d.earned) ? d.earned.length : 0;
           lines += n;
-          if (n > 0) bingoDays++;
+          if (n) bingoDays++;
           checks += done.length;
           done.forEach((i) => {
             const name = order[i];
@@ -1362,9 +1735,8 @@
         }
         const max = Math.max(1, ...values.map((x) => x.count));
         document.querySelector("#dashChart").innerHTML = values
-          .map((x) => {
-            const h = x.count ? Math.max(7, (x.count / max) * 100) : 2;
-            return (
+          .map(
+            (x) =>
               '<div class="dash-day" title="' +
               x.date +
               "：" +
@@ -1372,13 +1744,12 @@
               '列"><div class="dash-bar' +
               (x.count ? " has-bingo" : "") +
               '" style="height:' +
-              h +
-              '%"></div></div>'
-            );
-          })
+              Math.max(x.count ? 7 : 0, (x.count / max) * 100) +
+              '%"></div></div>',
+          )
           .join("");
         document.querySelector("#dashChartCaption").textContent =
-          values.length + "日分 · 金色はビンゴ達成日 · 1列=10pt";
+          "直近" + span + "日 · 金色はビンゴ達成日 · 棒にカーソルで日付";
         const top = Object.entries(itemCounts)
             .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
             .slice(0, 5),
@@ -1388,9 +1759,9 @@
               .map(
                 ([name, count]) =>
                   '<div class="dash-item"><span class="dash-item-name" title="' +
-                  escapeHtml(name) +
+                  escapeDash(name) +
                   '">' +
-                  escapeHtml(name) +
+                  escapeDash(name) +
                   '</span><span class="dash-item-count">' +
                   count +
                   '回</span><div class="dash-item-track"><div class="dash-item-fill" style="width:' +
@@ -1401,8 +1772,8 @@
           : '<div class="hint">この期間の記録はまだありません。</div>';
       }
 
-      function escapeHtml(value) {
-        return String(value).replace(
+      function escapeDash(s) {
+        return String(s).replace(
           /[&<>"']/g,
           (c) =>
             ({
@@ -1413,6 +1784,160 @@
               "'": "&#39;",
             })[c],
         );
+      }
+
+      let calendarCursor = new Date(dateKey() + "T00:00:00+09:00");
+      calendarCursor.setDate(1);
+
+      function renderCalendar() {
+        const monthStart = new Date(calendarCursor),
+          year = monthStart.getFullYear(),
+          month = monthStart.getMonth(),
+          offset = (monthStart.getDay() + 6) % 7,
+          nDays = new Date(year, month + 1, 0).getDate(),
+          all = allRecords(),
+          grid = document.querySelector("#calendarGrid"),
+          week = ["月", "火", "水", "木", "金", "土", "日"];
+        document.querySelector("#calendarMonth").textContent =
+          new Intl.DateTimeFormat("ja-JP", {
+            year: "numeric",
+            month: "long",
+          }).format(monthStart);
+        grid.innerHTML =
+          week
+            .map((x) => '<div class="calendar-weekday">' + x + "</div>")
+            .join("") +
+          Array.from(
+            { length: offset },
+            () => '<div class="calendar-empty"></div>',
+          ).join("");
+        let active = 0,
+          bingos = 0,
+          checks = 0;
+        for (let n = 1; n <= nDays; n++) {
+          const date = new Date(year, month, n),
+            key = new Intl.DateTimeFormat("en-CA", {
+              timeZone: "Asia/Tokyo",
+            }).format(date),
+            d = all[key],
+            done = d && Array.isArray(d.done) ? d.done : [],
+            order = d && Array.isArray(d.order) ? d.order : [],
+            lines = d && Array.isArray(d.earned) ? d.earned.length : 0,
+            rate = order.length ? done.length / order.length : 0;
+          if (done.length) {
+            active++;
+            checks += done.length;
+          }
+          if (lines) bingos++;
+          const level = done.length ? Math.max(1, Math.ceil(rate * 4)) : 0,
+            b = document.createElement("button");
+          b.type = "button";
+          b.className =
+            "calendar-day" +
+            (level ? " intensity-" + level : "") +
+            (lines ? " bingo-day" : "") +
+            (key === dateKey() ? " today-date" : "");
+          b.title =
+            key +
+            " · " +
+            done.length +
+            "/" +
+            order.length +
+            "項目 · " +
+            Math.round(rate * 100) +
+            "% · " +
+            lines +
+            "列";
+          b.innerHTML =
+            "<span>" +
+            n +
+            '</span><span class="day-rate">' +
+            (d ? Math.round(rate * 100) + "%" : "") +
+            "</span>";
+          grid.append(b);
+        }
+        document.querySelector("#calendarSummary").textContent =
+          active + "日活動 · " + checks + "項目達成 · " + bingos + "日ビンゴ";
+      }
+
+      function renderPointsHistory() {
+        const days = Object.values(allRecords()).sort((a, b) =>
+          a.date.localeCompare(b.date),
+        );
+        let earned = Number(state.carryPoints) || 0,
+          spent = 0;
+        const rows = [];
+        days.forEach((d) => {
+          const e = Number(d.points) || 0,
+            u = Number(d.spent) || 0;
+          earned += e;
+          spent += u;
+          rows.push({
+            date: d.date,
+            earned: e,
+            spent: u,
+            balance: earned - spent,
+            gifts: (d.redemptions || [])
+              .map((x) => x.name + " (" + x.points + "pt)")
+              .join("、"),
+          });
+        });
+        document.querySelector("#pointsHistoryRows").innerHTML = rows
+          .slice()
+          .reverse()
+          .map(
+            (x) =>
+              "<tr><td>" +
+              escapeDash(x.date) +
+              "</td><td>+" +
+              x.earned +
+              "</td><td>−" +
+              x.spent +
+              "</td><td>" +
+              x.balance +
+              "</td><td>" +
+              escapeDash(x.gifts || "—") +
+              "</td></tr>",
+          )
+          .join("");
+        document.querySelector("#pointsEarnedAll").textContent = earned;
+        document.querySelector("#pointsSpentAll").textContent = spent;
+        document.querySelector("#pointsBalanceAll").textContent =
+          earned - spent;
+        const start = new Date(dateKey() + "T00:00:00+09:00");
+        start.setDate(start.getDate() - 29);
+        const lookup = Object.fromEntries(days.map((d) => [d.date, d])),
+          vals = [];
+        for (let i = 0; i < 30; i++) {
+          const dt = new Date(start);
+          dt.setDate(start.getDate() + i);
+          const key = new Intl.DateTimeFormat("en-CA", {
+              timeZone: "Asia/Tokyo",
+            }).format(dt),
+            d = lookup[key] || {};
+          vals.push({
+            date: key,
+            e: Number(d.points) || 0,
+            s: Number(d.spent) || 0,
+          });
+        }
+        const max = Math.max(10, ...vals.flatMap((x) => [x.e, x.s]));
+        document.querySelector("#pointsChart").innerHTML = vals
+          .map(
+            (x) =>
+              '<div class="points-day" title="' +
+              x.date +
+              " · 獲得 " +
+              x.e +
+              " pt · 使用 " +
+              x.s +
+              ' pt"><div class="point-bar earned-bar" style="height:' +
+              Math.max(x.e ? 5 : 0, (x.e / max) * 100) +
+              '%"></div><div class="point-bar spent-bar" style="height:' +
+              Math.max(x.s ? 5 : 0, (x.s / max) * 100) +
+              '%"></div></div>',
+          )
+          .join("");
       }
 
       function render() {
@@ -1465,8 +1990,11 @@
               " pt で届きます（10 pt＝10円）"
           : "ご褒美リストから目標を選んでください。";
         document.querySelector("#redeemBtn").disabled = !reward || total < goal;
+
         renderHistory();
         renderDashboard();
+        renderCalendar();
+        renderPointsHistory();
       }
 
       function boot() {
@@ -1565,7 +2093,34 @@
         save();
       }
 
-      document.querySelector("#dashRange").onchange = renderDashboard;
+      document
+        .querySelector("#dashRange")
+        .addEventListener("change", renderDashboard);
+
+      document.querySelectorAll("[data-page-target]").forEach((btn) => {
+        btn.onclick = () => {
+          document.body.dataset.page = btn.dataset.pageTarget;
+          document.querySelectorAll("[data-page-target]").forEach((x) => {
+            const isActive = x === btn;
+            x.classList.toggle("active", isActive);
+            x.setAttribute("aria-pressed", isActive ? "true" : "false");
+          });
+          if (btn.dataset.pageTarget === "records" && state) {
+            renderDashboard();
+            renderCalendar();
+            renderPointsHistory();
+          }
+        };
+      });
+
+      document.querySelector("#calendarPrev").onclick = () => {
+        calendarCursor.setMonth(calendarCursor.getMonth() - 1);
+        renderCalendar();
+      };
+      document.querySelector("#calendarNext").onclick = () => {
+        calendarCursor.setMonth(calendarCursor.getMonth() + 1);
+        renderCalendar();
+      };
 
       document.querySelector("#editBtn").onclick = () => {
         const wrap = document.querySelector("#taskInputs");
@@ -1575,19 +2130,15 @@
             const h = document.createElement("div");
             h.style.cssText =
               "grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px;font-weight:700;font-size:13px";
-            h.textContent = "ここから3×3（17〜25）";
+            h.textContent = "項目一覧（カードの配置とは無関係）";
             wrap.append(h);
           }
           const label = document.createElement("label");
-          label.style.cssText =
-            "display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)";
           label.append(document.createTextNode(String(i + 1).padStart(2, "0")));
           const input = document.createElement("input");
           input.type = "text";
           input.maxLength = 60;
           input.value = task;
-          input.style.cssText =
-            "flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff;color:var(--ink)";
           label.append(input);
           wrap.append(label);
         });
@@ -1629,7 +2180,8 @@
         rewardDraft.forEach((r, i) => {
           const row = document.createElement("div");
           row.style.cssText =
-            "display:grid;grid-template-columns:auto 1fr 110px auto;gap:8px;align-items:center;margin:8px 0";
+            "display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap";
+          
           const radio = document.createElement("input");
           radio.type = "radio";
           radio.name = "activeReward";
@@ -1638,13 +2190,15 @@
             rewardDraftActiveId = r.id;
           };
           radio.value = r.id;
+
           const name = document.createElement("input");
           name.value = r.name;
           name.maxLength = 60;
           name.placeholder = "欲しいもの";
           name.dataset.name = "1";
           name.style.cssText =
-            "min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px";
+            "flex:1;min-width:120px;border:1px solid var(--line);border-radius:8px;padding:8px";
+
           const price = document.createElement("input");
           price.type = "number";
           price.min = "1";
@@ -1652,7 +2206,8 @@
           price.value = r.price;
           price.dataset.price = "1";
           price.style.cssText =
-            "width:110px;border:1px solid var(--line);border-radius:8px;padding:8px";
+            "width:95px;border:1px solid var(--line);border-radius:8px;padding:8px";
+
           const del = document.createElement("button");
           del.type = "button";
           del.className = "btn secondary";
@@ -1663,15 +2218,20 @@
               rewardDraftActiveId = rewardDraft[0]?.id || "";
             renderRewardEditor();
           };
+
           row.append(radio, name, price, del);
           wrap.append(row);
         });
+
         const add = document.createElement("div");
         add.style.cssText =
-          "display:grid;grid-template-columns:1fr 110px auto;gap:8px;margin-top:12px";
+          "display:flex;gap:8px;margin-top:12px;flex-wrap:wrap";
         add.innerHTML =
-          '<input id="newRewardName" placeholder="新しいご褒美" maxlength="60" style="min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px"><input id="newRewardPrice" type="number" min="1" step="1" placeholder="金額（円）" style="width:110px;border:1px solid var(--line);border-radius:8px;padding:8px"><button type="button" class="btn secondary" id="addRewardBtn">追加</button>';
+          '<input id="newRewardName" placeholder="新しいご褒美" maxlength="60" style="flex:1;min-width:120px;border:1px solid var(--line);border-radius:8px;padding:8px">' +
+          '<input id="newRewardPrice" type="number" min="1" step="1" placeholder="金額（円）" style="width:95px;border:1px solid var(--line);border-radius:8px;padding:8px">' +
+          '<button type="button" class="btn secondary" id="addRewardBtn">追加</button>';
         wrap.append(add);
+
         document.querySelector("#addRewardBtn").onclick = () => {
           const nm = document.querySelector("#newRewardName").value.trim(),
             price = Number(document.querySelector("#newRewardPrice").value);
@@ -1703,17 +2263,17 @@
           document.querySelector("#rewardInputs").children,
         ).slice(0, rewardDraft.length);
         rewardDraft = rewardDraft
-          .map((r, i) => ({
-            id: r.id,
-            name: rows[i].querySelector("[data-name]").value.trim(),
-            price: Math.max(
-              1,
-              Math.round(
-                Number(rows[i].querySelector("[data-price]").value) || 1,
-              ),
-            ),
-          }))
-          .filter((r) => r.name);
+          .map((r, i) => {
+            const nameEl = rows[i].querySelector("[data-name]");
+            const priceEl = rows[i].querySelector("[data-price]");
+            if (!nameEl || !priceEl) return null;
+            return {
+              id: r.id,
+              name: nameEl.value.trim(),
+              price: Math.max(1, Math.round(Number(priceEl.value) || 1)),
+            };
+          })
+          .filter((r) => r && r.name);
         const selected = document.querySelector(
           'input[name="activeReward"]:checked',
         );
@@ -1783,8 +2343,7 @@
       };
 
       document.querySelector("#csvBtn").onclick = () => {
-        const all = Object.assign({}, state.history);
-        all[state.today.date] = snapshot(state.today);
+        const all = allRecords();
         const rows = Object.values(all).sort((a, b) =>
             a.date.localeCompare(b.date),
           ),
@@ -1832,8 +2391,7 @@
       };
 
       document.querySelector("#pointsCsvBtn").onclick = () => {
-        const all = Object.assign({}, state.history);
-        all[state.today.date] = snapshot(state.today);
+        const all = allRecords();
         let earned = Number(state.carryPoints) || 0,
           spent = 0;
         const csv = [
