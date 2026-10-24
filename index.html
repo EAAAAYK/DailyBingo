@@ -1,0 +1,1887 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>日課ビンゴ ＆ 青空文庫（お試し版）</title>
+    <style>
+      :root {
+        --ink: #242c28;
+        --muted: #777d70;
+        --paper: #f5f2e9;
+        --card: #fffdf7;
+        --green: #506e55;
+        --line: #e8e2d4;
+        --gold: #d5a94f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family:
+          system-ui,
+          -apple-system,
+          "Yu Gothic",
+          Meiryo,
+          sans-serif;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      .wrap {
+        max-width: 1240px;
+        margin: auto;
+        padding: 30px 22px 58px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 18px;
+        margin-bottom: 22px;
+      }
+      .eyebrow {
+        color: var(--green);
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+      .top h1 {
+        font-size: clamp(27px, 4vw, 40px);
+        letter-spacing: 0.04em;
+        margin: 7px 0;
+      }
+      .date {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .tags {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .tag {
+        font-size: 12px;
+        padding: 7px 11px;
+        background: #eef1e8;
+        border-radius: 999px;
+        color: var(--green);
+        white-space: nowrap;
+      }
+      .tag.highlight {
+        background: #e6ede0;
+        color: #37533c;
+        font-weight: 600;
+      }
+      .panel {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 21px;
+        box-shadow: 0 5px 20px #453c2510;
+      }
+      .panelhead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .panel h2 {
+        font-size: 18px;
+        margin: 0;
+      }
+      .sub,
+      .hint {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 5px;
+      }
+      .boards {
+        display: grid;
+        grid-template-columns: 1.25fr 0.75fr;
+        gap: 16px;
+      }
+      .board {
+        background: #fffefa;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        padding: 16px;
+      }
+      .boardhead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .boardhead strong {
+        font-size: 15px;
+      }
+      .boardhead span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        gap: 8px;
+      }
+      .grid.four {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .grid.three {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .cell {
+        position: relative;
+        min-height: 78px;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        background: #fbf9f2;
+        color: var(--ink);
+        padding: 10px 9px;
+        text-align: left;
+        transition: 0.18s;
+      }
+      .cell:hover {
+        transform: translateY(-2px);
+        border-color: #a9b59e;
+      }
+      .cell.done {
+        background: #e7efe2;
+        border-color: #b6c8ae;
+        color: #3d6545;
+      }
+      .check {
+        position: absolute;
+        right: 8px;
+        top: 5px;
+        color: var(--green);
+        opacity: 0;
+      }
+      .done .check {
+        opacity: 1;
+      }
+      .label {
+        display: block;
+        font-size: 12px;
+        line-height: 1.45;
+        padding-right: 12px;
+      }
+      .pts {
+        display: block;
+        color: var(--muted);
+        font-size: 9px;
+        margin-top: 7px;
+      }
+      .actions {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+        margin-top: 14px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        border: 0;
+        border-radius: 9px;
+        padding: 9px 12px;
+        background: var(--green);
+        color: #fff;
+        font-size: 12px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn:hover {
+        opacity: 0.92;
+      }
+      .btn.secondary {
+        background: #f0eee6;
+        color: #56594f;
+      }
+      .btn.ghost {
+        background: transparent;
+        color: var(--muted);
+        padding: 8px;
+      }
+      .score {
+        font-size: 13px;
+        color: var(--muted);
+        margin-left: auto;
+      }
+      .sync {
+        font-size: 11px;
+        color: var(--green);
+      }
+      .reward {
+        margin-top: 13px;
+        padding: 13px 15px;
+        background: #faf6e9;
+        border: 1px solid #eee4c9;
+        border-radius: 12px;
+      }
+      .rewardline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+      }
+      .bar {
+        height: 8px;
+        background: #e9e4d5;
+        border-radius: 10px;
+        margin-top: 9px;
+        overflow: hidden;
+      }
+      .fill {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #94a873, #d4aa53);
+        transition: width 0.4s;
+      }
+      .reward small {
+        display: block;
+        color: var(--muted);
+        margin-top: 7px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+        gap: 18px;
+        margin-top: 18px;
+      }
+      .side {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+      .stat {
+        border-radius: 12px;
+        background: #f7f5ed;
+        padding: 11px;
+      }
+      .stat strong {
+        font-size: 19px;
+        display: block;
+      }
+      .stat span {
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .quote-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .quote-list {
+        display: grid;
+        gap: 10px;
+      }
+      .quote {
+        padding: 13px;
+        background: #f4f0e4;
+        border-radius: 12px;
+        line-height: 1.75;
+        font-size: 13px;
+      }
+      .quote p {
+        margin: 0 0 8px;
+      }
+      .quote footer {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .quote a {
+        color: var(--green);
+        text-decoration: none;
+      }
+      .quote a:hover {
+        text-decoration: underline;
+      }
+      .quote-status {
+        margin-top: 9px;
+        min-height: 17px;
+      }
+      .dashboard {
+        margin: 0;
+      }
+      .dash-range {
+        font-size: 12px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .dash-range select {
+        margin-left: 5px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 7px;
+        background: #fffdf7;
+        color: var(--ink);
+      }
+      .dash-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 9px;
+        margin: 4px 0 18px;
+      }
+      .dash-stat {
+        background: #f7f5ed;
+        border-radius: 12px;
+        padding: 13px;
+      }
+      .dash-stat strong {
+        display: block;
+        font-size: 24px;
+        color: var(--green);
+      }
+      .dash-stat span,
+      .dash-label,
+      .dash-caption {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .dash-columns {
+        display: grid;
+        grid-template-columns: 1.3fr 0.7fr;
+        gap: 20px;
+      }
+      .dash-label {
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .dash-chart {
+        height: 148px;
+        display: flex;
+        align-items: stretch;
+        gap: 3px;
+        padding: 8px 3px 0;
+        border-bottom: 1px solid var(--line);
+        overflow: hidden;
+      }
+      .dash-day {
+        flex: 1;
+        min-width: 3px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        position: relative;
+      }
+      .dash-bar {
+        width: min(100%, 20px);
+        min-width: 3px;
+        border-radius: 4px 4px 0 0;
+        background: #8ca17d;
+        min-height: 2px;
+      }
+      .dash-bar.has-bingo {
+        background: var(--gold);
+      }
+      .dash-day:hover .dash-bar {
+        filter: brightness(0.9);
+      }
+      .dash-day[title] {
+        cursor: help;
+      }
+      .dash-items {
+        display: grid;
+        gap: 9px;
+      }
+      .dash-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 3px 8px;
+        font-size: 11px;
+      }
+      .dash-item-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .dash-item-count {
+        color: var(--muted);
+      }
+      .dash-item-track {
+        grid-column: 1/-1;
+        height: 5px;
+        background: #eeeade;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .dash-item-fill {
+        height: 100%;
+        background: #8ca17d;
+        border-radius: 8px;
+      }
+      .dash-caption {
+        margin-top: 7px;
+      }
+      @media (max-width: 700px) {
+        .dash-columns {
+          grid-template-columns: 1fr;
+          gap: 17px;
+        }
+        .dash-chart {
+          height: 125px;
+        }
+        .dash-stats {
+          gap: 6px;
+        }
+        .dash-stat {
+          padding: 10px;
+        }
+        .dash-stat strong {
+          font-size: 21px;
+        }
+      }
+      .history-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      th,
+      td {
+        padding: 9px;
+        border-bottom: 1px solid var(--line);
+      }
+      th {
+        text-align: left;
+        white-space: nowrap;
+      }
+      .footer {
+        text-align: center;
+        font-size: 11px;
+        color: #929184;
+        margin-top: 20px;
+      }
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translate(-50%, 20px);
+        opacity: 0;
+        background: #29382d;
+        color: #fff;
+        padding: 11px 17px;
+        border-radius: 999px;
+        font-size: 13px;
+        transition: 0.25s;
+        pointer-events: none;
+        z-index: 9999;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+      #taskInputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+        max-height: 62vh;
+        overflow: auto;
+        padding: 4px;
+      }
+      dialog {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        width: min(780px, 94vw);
+        background: var(--card);
+        color: var(--ink);
+      }
+      dialog::backdrop {
+        background: #18221d77;
+      }
+      .dialog-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 14px;
+      }
+      .dialog-note {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      @media (max-width: 850px) {
+        .boards,
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .wrap {
+          padding: 22px 13px 44px;
+        }
+        .panel {
+          padding: 16px;
+        }
+        .board {
+          padding: 12px;
+        }
+        .cell {
+          min-height: 72px;
+          padding: 9px 7px;
+        }
+        .stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .top {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+      @media (max-width: 420px) {
+        .grid {
+          gap: 5px;
+        }
+        .cell {
+          min-height: 68px;
+          padding: 7px 5px;
+        }
+        .label {
+          font-size: 11px;
+        }
+        .pts {
+          font-size: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="top">
+        <div>
+          <div class="eyebrow">DAILY PRACTICE · AOZORA BUNKO</div>
+          <h1>日課ビンゴ ＆ 青空文庫</h1>
+          <div class="date" id="today"></div>
+        </div>
+        <div class="tags">
+          <span class="tag highlight" id="modeTag">お試し版（ブラウザ保存）</span>
+          <span class="tag">自分のペースで、ひとつずつ。</span>
+        </div>
+      </header>
+      <section class="panel">
+        <div class="panelhead">
+          <div>
+            <h2>今日のビンゴ</h2>
+            <div class="sub">
+              25項目を全マスに均等にシャッフル。1列で10 pt。
+            </div>
+          </div>
+          <div class="score"><strong id="points">0</strong> pt 使用可能</div>
+        </div>
+        <div class="boards">
+          <div class="board">
+            <div class="boardhead">
+              <strong>4 × 4 ビンゴ</strong><span id="count4">0 / 16 · 0列</span>
+            </div>
+            <div class="grid four" id="grid4"></div>
+          </div>
+          <div class="board">
+            <div class="boardhead">
+              <strong>3 × 3 ビンゴ</strong><span id="count3">0 / 9 · 0列</span>
+            </div>
+            <div class="grid three" id="grid3"></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn secondary" id="editBtn">25項目を編集</button>
+          <button class="btn ghost" id="resetBtn">今日の達成をリセット</button>
+          <span class="sync" id="syncStatus">読み込み中…</span>
+        </div>
+        <div class="reward">
+          <div class="rewardline">
+            <span>🎁 目標のご褒美　<strong id="rewardName"></strong></span>
+            <span>
+              <strong id="rewardPct">0%</strong>
+              <button class="btn secondary" id="redeemBtn">
+                交換済みにする
+              </button>
+            </span>
+          </div>
+          <div class="bar"><div class="fill" id="fill"></div></div>
+          <small id="rewardCaption"></small>
+          <button class="btn ghost" id="rewardManage">
+            ご褒美リストを編集
+          </button>
+        </div>
+      </section>
+      <div class="layout">
+        <div class="side">
+          <section class="panel">
+            <div class="panelhead">
+              <div>
+                <h2>今日の達成状況</h2>
+                <div class="sub" id="saveSubText">
+                  達成率とポイントはブラウザ（localStorage）に自動保存。
+                </div>
+              </div>
+            </div>
+            <div class="stats">
+              <div class="stat">
+                <strong id="stat4">0/16</strong><span>4×4 達成</span>
+              </div>
+              <div class="stat">
+                <strong id="stat3">0/9</strong><span>3×3 達成</span>
+              </div>
+              <div class="stat">
+                <strong id="statLines">0</strong><span>今日のビンゴ列</span>
+              </div>
+              <div class="stat">
+                <strong id="statTotal">0</strong><span>使用可能ポイント</span>
+              </div>
+              <div class="stat">
+                <strong id="statEarned">0</strong><span>累計獲得</span>
+              </div>
+              <div class="stat">
+                <strong id="statSpent">0</strong><span>累計使用</span>
+              </div>
+            </div>
+          </section>
+          <section class="panel dashboard">
+            <div class="panelhead">
+              <div>
+                <h2>この頃のハイライト</h2>
+                <div class="sub">
+                  保存された日々の記録から、最近の積み重ねを集計します。
+                </div>
+              </div>
+              <label class="dash-range"
+                >期間
+                <select id="dashRange">
+                  <option value="7">7日</option>
+                  <option value="30" selected>30日</option>
+                  <option value="90">90日</option>
+                </select></label
+              >
+            </div>
+            <div class="dash-stats">
+              <div class="dash-stat">
+                <strong id="dashBingoDays">0</strong><span>ビンゴした日</span>
+              </div>
+              <div class="dash-stat">
+                <strong id="dashLines">0</strong><span>そろえた列</span>
+              </div>
+              <div class="dash-stat">
+                <strong id="dashChecks">0</strong><span>日課チェック合計</span>
+              </div>
+            </div>
+            <div class="dash-columns">
+              <div class="dash-chart-wrap">
+                <div class="dash-label">日ごとのビンゴ列数</div>
+                <div
+                  id="dashChart"
+                  class="dash-chart"
+                  role="img"
+                  aria-label="日ごとのビンゴ列数グラフ"
+                ></div>
+                <div class="dash-caption" id="dashChartCaption"></div>
+              </div>
+              <div>
+                <div class="dash-label">よく達成した日課 TOP 5</div>
+                <div id="dashItems" class="dash-items"></div>
+              </div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panelhead">
+              <div>
+                <h2>日々の記録</h2>
+                <div class="sub">達成率や達成した日課を振り返れます。</div>
+              </div>
+              <div style="display: flex; gap: 7px; align-items: center; flex-wrap: wrap">
+                <a
+                  id="sheetLink"
+                  class="btn secondary"
+                  href="#"
+                  target="_blank"
+                  rel="noopener"
+                  >保存先: ブラウザ</a
+                ><button class="btn secondary" id="csvBtn">日課CSV</button
+                ><button class="btn secondary" id="pointsCsvBtn">
+                  ポイントCSV
+                </button>
+              </div>
+            </div>
+            <div class="history-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>日付</th>
+                    <th>達成</th>
+                    <th>達成率</th>
+                    <th>列</th>
+                    <th>獲得</th>
+                    <th>使用</th>
+                    <th>達成した項目</th>
+                  </tr>
+                </thead>
+                <tbody id="historyRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+        <aside class="panel">
+          <div class="panelhead">
+            <div>
+              <div class="quote-head">
+                <h2>青空文庫から今日の3文</h2>
+                <button class="btn secondary" id="quoteRefresh">別の3文</button>
+              </div>
+              <div class="sub">
+                30文字以上の一文を選びました。作者と作品の出典を添えています。
+              </div>
+            </div>
+          </div>
+          <div class="quote-list" id="quoteList"></div>
+          <div class="hint quote-status" id="quoteStatus"></div>
+        </aside>
+      </div>
+      <div class="footer">小さな達成も、拾った言葉も、ここに残していこう。</div>
+    </main>
+    <div class="toast" id="toast"></div>
+    <dialog id="editDialog">
+      <form method="dialog">
+        <h2>日課25項目を編集</h2>
+        <p class="dialog-note">
+          1〜16番が4×4、17〜25番が3×3に入ります。変更は次の日のカードから反映します。
+        </p>
+        <div id="taskInputs"></div>
+        <div class="dialog-actions">
+          <span class="dialog-note">項目番号はカードの組分けに使います。</span>
+          <div>
+            <button class="btn secondary" value="cancel">キャンセル</button>
+            <button class="btn" id="saveTasks" value="save">保存</button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="rewardDialog">
+      <form method="dialog">
+        <h2>ご褒美リスト</h2>
+        <p class="dialog-note">
+          金額と同じポイントを、交換時に差し引きます（10pt＝10円）。目標にするご褒美をひとつ選びます。
+        </p>
+        <div id="rewardInputs"></div>
+        <div class="dialog-actions">
+          <span class="dialog-note">削除しても過去の交換記録は残ります。</span>
+          <div>
+            <button class="btn secondary" value="cancel">閉じる</button>
+            <button class="btn" id="saveRewards" value="save">保存</button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+    <script>
+      const defaults = [
+        "朝、窓を開ける",
+        "水を一杯飲む",
+        "少し体を動かす",
+        "机の上を整える",
+        "本を数ページ読む",
+        "外の空気を吸う",
+        "今日の予定を見る",
+        "誰かに連絡する",
+        "好きな音楽を聴く",
+        "思いつきをメモする",
+        "食事をゆっくり味わう",
+        "画面から目を離す",
+        "気になったことを調べる",
+        "一箇所だけ片づける",
+        "自分をねぎらう",
+        "明日の準備をする",
+        "洗濯物をたたむ",
+        "部屋を5分片づける",
+        "日記を一行書く",
+        "財布や鍵を定位置に戻す",
+        "食器を片づける",
+        "外に出て日光を浴びる",
+        "翌日の持ち物を確認する",
+        "短い休憩をとる",
+        "机の上を拭く",
+      ];
+
+      // 青空文庫の名文コレクション（GitHubお試し版／オフライン用）
+      const BUILTIN_QUOTES = [
+        {
+          text: "人間は誰でも猛獣使であり、その猛獣に当るのが、各人の性情だという。",
+          author: "中島敦",
+          title: "山月記",
+          url: "https://www.aozora.gr.jp/cards/000119/card624.html",
+        },
+        {
+          text: "不吉な轟音をとどろかせて飛び去るあの得体の知れない不吉な塊が私の心を始終圧えつけていた。",
+          author: "梶井基次郎",
+          title: "檸檬",
+          url: "https://www.aozora.gr.jp/cards/000074/card424.html",
+        },
+        {
+          text: "メロスには政治がわからぬ。メロスは、村の牧人である。笛を吹き、羊と遊んで暮して来た。けれども邪悪に対しては、人一倍に敏感であった。",
+          author: "太宰治",
+          title: "走れメロス",
+          url: "https://www.aozora.gr.jp/cards/000035/card1567.html",
+        },
+        {
+          text: "自由と独立と己れとに充ちた現代に生れた我々は、その犠牲としてみんなこの淋しみを味はなくてはならないでせう。",
+          author: "夏目漱石",
+          title: "こころ",
+          url: "https://www.aozora.gr.jp/cards/000148/card779.html",
+        },
+        {
+          text: "なにがしあわせかわからないです。ほんとうにどんなにつらいことでもそれがただしいみちを進む中でのできごとなら峠の上りも下りもみんなほんとうの幸福に近づく一あしずつですから。",
+          author: "宮沢賢治",
+          title: "銀河鉄道の夜",
+          url: "https://www.aozora.gr.jp/cards/000081/card43737.html",
+        },
+        {
+          text: "人生は一箱のマッチに似ている。重大に扱うのは莫迦莫迦しい。重大に扱わなければ危険である。",
+          author: "芥川龍之介",
+          title: "侏儒の言葉",
+          url: "https://www.aozora.gr.jp/cards/000879/card159.html",
+        },
+        {
+          text: "智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。とかくに人の世は住みにくい。",
+          author: "夏目漱石",
+          title: "草枕",
+          url: "https://www.aozora.gr.jp/cards/000148/card776.html",
+        },
+        {
+          text: "詩とは感情の神経質なる顫動である。それは肉体的なる脈搏であり、霊魂の呼吸である。",
+          author: "萩原朔太郎",
+          title: "月に吠える",
+          url: "https://www.aozora.gr.jp/cards/000067/card43422.html",
+        },
+        {
+          text: "自分の境遇と喜助の境遇との懸隔を考へて、驚いたのである。これまでは単に人の身の上として聞いてゐたのが、俄に我が身の上のこととなつて心に響いた。",
+          author: "森鴎外",
+          title: "高瀬舟",
+          url: "https://www.aozora.gr.jp/cards/000129/card691.html",
+        },
+        {
+          text: "兵十は、火縄銃をばたりと取り落しました。青い煙が、まだ筒口から細く出ていました。",
+          author: "新美南吉",
+          title: "ごんぎつね",
+          url: "https://www.aozora.gr.jp/cards/000121/card628.html",
+        },
+        {
+          text: "富士には、月見草がよく似合ふ。黄金色の花が夕闇の中にぽっかりと浮んで、静かな風に揺れている。",
+          author: "太宰治",
+          title: "富嶽百景",
+          url: "https://www.aozora.gr.jp/cards/000035/card271.html",
+        },
+        {
+          text: "ある日の事でございます。御釈迦様は極楽の蓮池のふちを、独りでぶらぶら御歩きになっていらっしゃいました。",
+          author: "芥川龍之介",
+          title: "蜘蛛の糸",
+          url: "https://www.aozora.gr.jp/cards/000879/card92.html",
+        },
+        {
+          text: "風立ちぬ、いざ生きめやも。この一句がどこからともなく私の心に浮かび上がって、私を静かに励ましつづけた。",
+          author: "堀辰雄",
+          title: "風立ちぬ",
+          url: "https://www.aozora.gr.jp/cards/001030/card4790.html",
+        },
+        {
+          text: "山雀が来て啼いた。梢を伝って、木の葉の露を翻して、枝から枝へと渡るのが、眼の前に見えた。",
+          author: "泉鏡花",
+          title: "高野聖",
+          url: "https://www.aozora.gr.jp/cards/000050/card3572.html",
+        },
+        {
+          text: "あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。",
+          author: "宮沢賢治",
+          title: "ポラーノの広場",
+          url: "https://www.aozora.gr.jp/cards/000081/card456.html",
+        },
+        {
+          text: "僕の前に道はない　僕の後ろに道は出来る　ああ、自然よ　父よ　僕を一人立ちにさせた広大な父よ",
+          author: "高村光太郎",
+          title: "道程",
+          url: "https://www.aozora.gr.jp/cards/001168/card46376.html",
+        },
+        {
+          text: "人間は可憐であり脆弱であり、それ故に愚かであり、あまりに下等なものであるが、人間を愛するとはそれらの弱さを愛することである。",
+          author: "坂口安吾",
+          title: "堕落論",
+          url: "https://www.aozora.gr.jp/cards/001095/card42617.html",
+        },
+        {
+          text: "年をとるということは、自分の心のなかに、ひとつずつ静かな場所が増えてゆくことかもしれない。",
+          author: "岡本かの子",
+          title: "老妓抄",
+          url: "https://www.aozora.gr.jp/cards/000076/card46944.html",
+        },
+        {
+          text: "頭のいい人は批評に長じている。しかし新しいものを生み出すには、頭のよさよりも愚直なまでの執念が必要である。",
+          author: "寺田寅彦",
+          title: "科学者とあたま",
+          url: "https://www.aozora.gr.jp/cards/000042/card2353.html",
+        },
+        {
+          text: "武蔵野の俤は今わずかに入間郡に残れりといふことを読んだことがある。自分はその時ふと武蔵野の自然に親しみたくなった。",
+          author: "国木田独歩",
+          title: "武蔵野",
+          url: "https://www.aozora.gr.jp/cards/000037/card8.html",
+        },
+        {
+          text: "美は物体にあるのではなく、物体と物体とのつくり出す陰翳のあや、明暗にあると考える。",
+          author: "谷崎潤一郎",
+          title: "陰翳礼讃",
+          url: "https://www.aozora.gr.jp/cards/001383/card56642.html",
+        },
+        {
+          text: "雨ニモマケズ　風ニモマケズ　雪ニモ夏ノ暑サニモマケヌ　丈夫ナカラダヲモチ　慾ハナク　決シテ瞋ラズ　イツモシヅカニワラッテヰル",
+          author: "宮沢賢治",
+          title: "雨ニモマケズ",
+          url: "https://www.aozora.gr.jp/cards/000081/card45630.html",
+        },
+        {
+          text: "朝、目がさめると、いつもとは違ふ新しい一日が始まつてゐる。それだけで人は生きてゆく甲斐があるといふものだ。",
+          author: "中島敦",
+          title: "光と風と夢",
+          url: "https://www.aozora.gr.jp/cards/000119/card622.html",
+        },
+        {
+          text: "私はその人を常に先生と呼んでいた。だからここでもただ先生と書くだけで本名は打ち明けない。これは世間を憚る遠慮というよりも、その方が私にとって自然だからである。",
+          author: "夏目漱石",
+          title: "こころ",
+          url: "https://www.aozora.gr.jp/cards/000148/card779.html",
+        },
+      ];
+
+      // Google Apps Script 環境かどうかを自動判別
+      const isGas =
+        typeof google !== "undefined" &&
+        Boolean(google.script) &&
+        typeof google.script.run !== "undefined";
+      const LOCAL_STORAGE_KEY = "daily_bingo_aozora_v1";
+
+      let state,
+        saveQueue = Promise.resolve();
+
+      const day = () =>
+        new Intl.DateTimeFormat("ja-JP", {
+          dateStyle: "full",
+          timeZone: "Asia/Tokyo",
+        }).format(new Date());
+
+      const dateKey = () =>
+        new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(
+          new Date(),
+        );
+
+      const shuffle = (a) => {
+        const x = [...a];
+        for (let i = x.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [x[i], x[j]] = [x[j], x[i]];
+        }
+        return x;
+      };
+
+      function shuffleWithSeed(arr, seed) {
+        const x = [...arr];
+        for (let i = x.length - 1; i > 0; i--) {
+          seed = (seed * 9301 + 49297) % 233280;
+          const j = Math.floor((seed / 233280) * (i + 1));
+          [x[i], x[j]] = [x[j], x[i]];
+        }
+        return x;
+      }
+
+      function pickQuotes(seedString, count = 3) {
+        let list = [...BUILTIN_QUOTES];
+        if (seedString) {
+          let hash = 0;
+          for (let i = 0; i < seedString.length; i++) {
+            hash = (hash << 5) - hash + seedString.charCodeAt(i);
+            hash |= 0;
+          }
+          list = shuffleWithSeed(list, Math.abs(hash));
+        } else {
+          list = shuffle(list);
+        }
+        return list.slice(0, count);
+      }
+
+      function makeOrder(tasks) {
+        return shuffle(tasks.slice(0, 25));
+      }
+
+      function newDay(key) {
+        return {
+          date: key,
+          order: makeOrder(state.tasks),
+          done: [],
+          earned: [],
+          points: 0,
+          spent: 0,
+          redemptions: [],
+        };
+      }
+
+      function snapshot(d) {
+        return {
+          date: d.date,
+          order: Array.isArray(d.order) ? d.order : [],
+          done: Array.isArray(d.done) ? d.done : [],
+          earned: Array.isArray(d.earned) ? d.earned : [],
+          points: Number(d.points) || 0,
+          spent: Number(d.spent) || 0,
+          redemptions: Array.isArray(d.redemptions) ? d.redemptions : [],
+        };
+      }
+
+      function normalizeTasks(input) {
+        let a = Array.isArray(input) ? input.slice(0, 25) : [];
+        defaults.forEach((x) => {
+          if (a.length < 25 && !a.includes(x)) a.push(x);
+        });
+        while (a.length < 25) a.push("日課 " + (a.length + 1));
+        return a.slice(0, 25);
+      }
+
+      function loadToday(old, key) {
+        if (!old) return newDay(key);
+        let d = snapshot(old);
+        d.date = key;
+        if (d.order.length === 16)
+          d.order = d.order.concat(shuffle(state.tasks.slice(16, 25)));
+        if (d.order.length !== 25) return newDay(key);
+        d.done = d.done.filter((i) => Number.isInteger(i) && i >= 0 && i < 25);
+        d.earned = lineIds(d.done);
+        d.points = d.earned.length * 10;
+        d.spent = Number(d.spent) || 0;
+        d.redemptions = Array.isArray(d.redemptions) ? d.redemptions : [];
+        return d;
+      }
+
+      function lineIds(done) {
+        const all = [];
+        function board(start, size, id) {
+          const d = new Set(done);
+          for (let r = 0; r < size; r++)
+            if (
+              Array.from(
+                { length: size },
+                (_, c) => start + r * size + c,
+              ).every((i) => d.has(i))
+            )
+              all.push(id + "r" + r);
+          for (let c = 0; c < size; c++)
+            if (
+              Array.from(
+                { length: size },
+                (_, r) => start + r * size + c,
+              ).every((i) => d.has(i))
+            )
+              all.push(id + "c" + c);
+          if (
+            Array.from({ length: size }, (_, i) => start + i * size + i).every(
+              (i) => d.has(i),
+            )
+          )
+            all.push(id + "d0");
+          if (
+            Array.from(
+              { length: size },
+              (_, i) => start + i * size + (size - 1 - i),
+            ).every((i) => d.has(i))
+          )
+            all.push(id + "d1");
+        }
+        board(0, 4, "4");
+        board(16, 3, "3");
+        return all;
+      }
+
+      // ローカルストレージ操作関数
+      function loadStorageData() {
+        try {
+          const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+          console.error("localStorage読み込みエラー:", e);
+          return null;
+        }
+      }
+
+      function saveStorageData(settings, today) {
+        try {
+          let data = loadStorageData() || {};
+          data.settings = settings;
+          data.history = data.history || {};
+          if (today && today.date) {
+            data.history[today.date] = snapshot(today);
+          }
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+          return true;
+        } catch (e) {
+          console.error("localStorage保存エラー:", e);
+          return false;
+        }
+      }
+
+      function save() {
+        const syncEl = document.querySelector("#syncStatus");
+        syncEl.textContent = "保存中…";
+        const payload = {
+          settings: {
+            tasks: state.tasks,
+            rewards: state.rewards,
+            activeRewardId: state.activeRewardId,
+            carryPoints: state.carryPoints,
+          },
+          today: snapshot(state.today),
+        };
+
+        if (isGas) {
+          saveQueue = saveQueue
+            .then(
+              () =>
+                new Promise((resolve, reject) =>
+                  google.script.run
+                    .withSuccessHandler(resolve)
+                    .withFailureHandler(reject)
+                    .saveAppData(payload),
+                ),
+            )
+            .then(() => {
+              syncEl.textContent = "スプレッドシートに保存済み";
+            })
+            .catch((err) => {
+              console.error(err);
+              syncEl.textContent = "同期エラー";
+              toast("同期に失敗しました。再読み込みして確認してください。");
+            });
+        } else {
+          // GitHubお試し版 / ローカルストレージ保存
+          saveQueue = saveQueue.then(() => {
+            const ok = saveStorageData(payload.settings, payload.today);
+            if (ok) {
+              syncEl.textContent = "ブラウザに保存済み (お試し版)";
+            } else {
+              syncEl.textContent = "保存エラー";
+              toast("ブラウザへの保存に失敗しました。");
+            }
+          });
+        }
+      }
+
+      function totalEarned() {
+        return (
+          Number(state.carryPoints || 0) +
+          Object.values(state.history).reduce(
+            (s, d) =>
+              s + (d.date === state.today.date ? 0 : Number(d.points) || 0),
+            0,
+          ) +
+          (Number(state.today.points) || 0)
+        );
+      }
+
+      function totalSpent() {
+        return (
+          Object.values(state.history).reduce(
+            (s, d) =>
+              s + (d.date === state.today.date ? 0 : Number(d.spent) || 0),
+            0,
+          ) + (Number(state.today.spent) || 0)
+        );
+      }
+
+      function totalPoints() {
+        return totalEarned() - totalSpent();
+      }
+
+      function activeReward() {
+        return state.rewards.find((r) => r.id === state.activeRewardId) || null;
+      }
+
+      function toast(s) {
+        const t = document.querySelector("#toast");
+        t.textContent = s;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 1900);
+      }
+
+      function renderGrid(el, items, start, size) {
+        el.innerHTML = "";
+        items.forEach((task, j) => {
+          const i = start + j,
+            b = document.createElement("button");
+          b.className = "cell" + (state.today.done.includes(i) ? " done" : "");
+          b.innerHTML =
+            '<span class="check">✓</span><span class="label"></span><span class="pts">列がそろうと +10 pt</span>';
+          b.querySelector(".label").textContent = task;
+          b.onclick = () => {
+            const before = lineIds(state.today.done).length;
+            state.today.done = state.today.done.includes(i)
+              ? state.today.done.filter((x) => x !== i)
+              : state.today.done.concat(i);
+            state.today.earned = lineIds(state.today.done);
+            state.today.points = state.today.earned.length * 10;
+            const delta = state.today.earned.length - before;
+            if (delta > 0)
+              toast("ビンゴ！ " + delta + "列、+" + delta * 10 + " pt");
+            else if (delta < 0)
+              toast("列が解除され、" + Math.abs(delta * 10) + " pt戻りました");
+            save();
+            render();
+          };
+          el.appendChild(b);
+        });
+      }
+
+      function renderQuotes(quotes, error) {
+        const list = document.querySelector("#quoteList");
+        list.innerHTML = "";
+        if (!quotes || !quotes.length) {
+          list.innerHTML =
+            '<div class="quote">今日は引用を読み込めませんでした。</div>';
+          document.querySelector("#quoteStatus").textContent =
+            error || "通信を確認して「別の3文」をお試しください。";
+          return;
+        }
+        quotes.forEach((q) => {
+          const card = document.createElement("article");
+          card.className = "quote";
+          const p = document.createElement("p");
+          p.textContent = "「" + q.text + "」";
+          const f = document.createElement("footer");
+          f.textContent = q.author + "『" + q.title + "』 · ";
+          const a = document.createElement("a");
+          a.href = q.url;
+          a.target = "_blank";
+          a.rel = "noopener";
+          a.textContent = "青空文庫";
+          f.appendChild(a);
+          card.append(p, f);
+          list.appendChild(card);
+        });
+        document.querySelector("#quoteStatus").textContent = "";
+      }
+
+      function renderHistory() {
+        const all = Object.assign({}, state.history);
+        all[state.today.date] = snapshot(state.today);
+        const rows = Object.values(all).sort((a, b) =>
+            b.date.localeCompare(a.date),
+          ),
+          tbody = document.querySelector("#historyRows");
+        tbody.innerHTML = "";
+        rows.forEach((d) => {
+          const order = Array.isArray(d.order) ? d.order : [],
+            done = Array.isArray(d.done) ? d.done : [],
+            items = done.map((i) => order[i]).filter(Boolean),
+            tr = document.createElement("tr"),
+            cells = [
+              d.date,
+              done.length + "/" + order.length,
+              order.length
+                ? Math.round((done.length / order.length) * 100) + "%"
+                : "",
+              String((d.earned || []).length),
+              String(Number(d.points) || 0) + " pt",
+              String(Number(d.spent) || 0) + " pt",
+              items.join("、") || "—",
+            ];
+          cells.forEach((v, i) => {
+            const td = document.createElement("td");
+            td.textContent = v;
+            if (i === 5) td.style.minWidth = "180px";
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+      }
+
+      function renderDashboard() {
+        const span = Number(document.querySelector("#dashRange")?.value) || 30,
+          today = new Date(dateKey() + "T00:00:00+09:00"),
+          start = new Date(today);
+        start.setDate(start.getDate() - span + 1);
+        const days = Object.values(
+          Object.assign({}, state.history, {
+            [state.today.date]: snapshot(state.today),
+          }),
+        )
+          .filter((d) => {
+            const t = new Date(d.date + "T00:00:00+09:00");
+            return t >= start && t <= today;
+          })
+          .sort((a, b) => a.date.localeCompare(b.date));
+        let lines = 0,
+          checks = 0,
+          bingoDays = 0;
+        const itemCounts = {};
+        days.forEach((d) => {
+          const order = Array.isArray(d.order) ? d.order : [],
+            done = Array.isArray(d.done) ? d.done : [],
+            n = Array.isArray(d.earned) ? d.earned.length : 0;
+          lines += n;
+          if (n > 0) bingoDays++;
+          checks += done.length;
+          done.forEach((i) => {
+            const name = order[i];
+            if (name) itemCounts[name] = (itemCounts[name] || 0) + 1;
+          });
+        });
+        document.querySelector("#dashBingoDays").textContent = bingoDays;
+        document.querySelector("#dashLines").textContent = lines;
+        document.querySelector("#dashChecks").textContent = checks;
+        const byDate = Object.fromEntries(
+            days.map((d) => [
+              d.date,
+              Array.isArray(d.earned) ? d.earned.length : 0,
+            ]),
+          ),
+          values = [];
+        for (let i = 0; i < span; i++) {
+          const t = new Date(start);
+          t.setDate(start.getDate() + i);
+          const key = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Asia/Tokyo",
+          }).format(t);
+          values.push({ date: key, count: byDate[key] || 0 });
+        }
+        const max = Math.max(1, ...values.map((x) => x.count));
+        document.querySelector("#dashChart").innerHTML = values
+          .map((x) => {
+            const h = x.count ? Math.max(7, (x.count / max) * 100) : 2;
+            return (
+              '<div class="dash-day" title="' +
+              x.date +
+              "：" +
+              x.count +
+              '列"><div class="dash-bar' +
+              (x.count ? " has-bingo" : "") +
+              '" style="height:' +
+              h +
+              '%"></div></div>'
+            );
+          })
+          .join("");
+        document.querySelector("#dashChartCaption").textContent =
+          values.length + "日分 · 金色はビンゴ達成日 · 1列=10pt";
+        const top = Object.entries(itemCounts)
+            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+            .slice(0, 5),
+          maxItem = Math.max(1, ...top.map((x) => x[1]));
+        document.querySelector("#dashItems").innerHTML = top.length
+          ? top
+              .map(
+                ([name, count]) =>
+                  '<div class="dash-item"><span class="dash-item-name" title="' +
+                  escapeHtml(name) +
+                  '">' +
+                  escapeHtml(name) +
+                  '</span><span class="dash-item-count">' +
+                  count +
+                  '回</span><div class="dash-item-track"><div class="dash-item-fill" style="width:' +
+                  (count / maxItem) * 100 +
+                  '%"></div></div></div>',
+              )
+              .join("")
+          : '<div class="hint">この期間の記録はまだありません。</div>';
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+
+      function render() {
+        document.querySelector("#today").textContent = day();
+        renderGrid(
+          document.querySelector("#grid4"),
+          state.today.order.slice(0, 16),
+          0,
+          4,
+        );
+        renderGrid(
+          document.querySelector("#grid3"),
+          state.today.order.slice(16, 25),
+          16,
+          3,
+        );
+        const done = state.today.done,
+          done4 = done.filter((i) => i < 16).length,
+          done3 = done.filter((i) => i >= 16).length,
+          lines4 = state.today.earned.filter((x) => x[0] === "4").length,
+          lines3 = state.today.earned.filter((x) => x[0] === "3").length,
+          total = totalPoints();
+        document.querySelector("#count4").textContent =
+          done4 + " / 16 · " + lines4 + "列";
+        document.querySelector("#count3").textContent =
+          done3 + " / 9 · " + lines3 + "列";
+        document.querySelector("#stat4").textContent = done4 + "/16";
+        document.querySelector("#stat3").textContent = done3 + "/9";
+        document.querySelector("#statLines").textContent =
+          state.today.earned.length;
+        document.querySelector("#statTotal").textContent = total;
+        document.querySelector("#statEarned").textContent = totalEarned();
+        document.querySelector("#statSpent").textContent = totalSpent();
+        document.querySelector("#points").textContent = total;
+        const reward = activeReward(),
+          goal = reward ? Number(reward.price) || 0 : 0,
+          pct = goal
+            ? Math.min(100, Math.round((Math.max(0, total) / goal) * 100))
+            : 0;
+        document.querySelector("#fill").style.width = pct + "%";
+        document.querySelector("#rewardPct").textContent = pct + "%";
+        document.querySelector("#rewardName").textContent = reward
+          ? reward.name + " (" + goal + "円)"
+          : "未設定";
+        document.querySelector("#rewardCaption").textContent = reward
+          ? total >= goal
+            ? "交換できます。おめでとう！"
+            : "あと " +
+              Math.max(0, goal - total) +
+              " pt で届きます（10 pt＝10円）"
+          : "ご褒美リストから目標を選んでください。";
+        document.querySelector("#redeemBtn").disabled = !reward || total < goal;
+        renderHistory();
+        renderDashboard();
+      }
+
+      function boot() {
+        const syncEl = document.querySelector("#syncStatus");
+        if (isGas) {
+          google.script.run
+            .withSuccessHandler((data) => {
+              applyBootData(data);
+              renderQuotes(data.quotes, data.quoteError);
+            })
+            .withFailureHandler((err) => {
+              document.querySelector("#quoteStatus").textContent =
+                "データ取得エラー: " +
+                (err && err.message ? err.message : String(err));
+              syncEl.textContent = "読み込みエラー";
+            })
+            .getAppData();
+        } else {
+          // GitHubお試し版（ローカルストレージから起動）
+          const local = loadStorageData() || {};
+          const localQuotes = pickQuotes(dateKey());
+          applyBootData({
+            settings: local.settings || {},
+            history: local.history || {},
+            spreadsheetUrl: "",
+            quotes: localQuotes,
+            quoteError: "",
+          });
+          renderQuotes(localQuotes, "");
+          syncEl.textContent = "ブラウザに保存済み (お試し版)";
+        }
+      }
+
+      function applyBootData(data) {
+        state = Object.assign({}, data.settings || {});
+        state.history = data.history || {};
+        state.tasks = normalizeTasks(state.tasks);
+        state.carryPoints = Number(state.carryPoints) || 0;
+        if (!Array.isArray(state.rewards) || !state.rewards.length) {
+          state.rewards = [
+            {
+              id: "reward-" + Date.now(),
+              name: state.reward || "好きなものをひとつ",
+              price: Number(state.goal) || 200,
+            },
+          ];
+          state.activeRewardId = state.rewards[0].id;
+        }
+        state.activeRewardId = state.activeRewardId || state.rewards[0].id;
+        const key = dateKey();
+        state.today = loadToday(state.history[key], key);
+        state.sheetUrl = data.spreadsheetUrl;
+
+        const modeTag = document.querySelector("#modeTag");
+        const subText = document.querySelector("#saveSubText");
+        const link = document.querySelector("#sheetLink");
+
+        if (isGas) {
+          if (modeTag) {
+            modeTag.textContent = "スプレッドシート連携版";
+            modeTag.classList.remove("highlight");
+          }
+          if (subText) {
+            subText.textContent =
+              "達成率とポイントはGoogleスプレッドシートに自動保存。";
+          }
+          if (link && state.sheetUrl) {
+            link.href = state.sheetUrl;
+            link.textContent = "保存シート";
+            link.target = "_blank";
+            link.rel = "noopener";
+          }
+        } else {
+          if (modeTag) {
+            modeTag.textContent = "GitHubお試し版（ブラウザ保存）";
+            modeTag.classList.add("highlight");
+          }
+          if (subText) {
+            subText.textContent =
+              "達成率とポイントはこのブラウザ（localStorage）に自動保存。";
+          }
+          if (link) {
+            link.href = "javascript:void(0)";
+            link.textContent = "保存先: ブラウザ";
+            link.title = "クリックして保存状況を確認";
+            link.onclick = (e) => {
+              e.preventDefault();
+              alert(
+                "【GitHubお試し版の保存状況】\n\n・データはお使いのブラウザ（localStorage）に安全に自動保存されています。\n・ブラウザを閉じたり更新しても記録は保持されます。\n・「日課CSV」「ポイントCSV」からいつでもデータを書き出せます。\n\n※ Googleスプレッドシートへの自動集計・グラフ連携はGoogle Apps Script版でご利用いただけます。",
+              );
+            };
+          }
+        }
+
+        render();
+        save();
+      }
+
+      document.querySelector("#dashRange").onchange = renderDashboard;
+
+      document.querySelector("#editBtn").onclick = () => {
+        const wrap = document.querySelector("#taskInputs");
+        wrap.innerHTML = "";
+        state.tasks.forEach((task, i) => {
+          if (i === 16) {
+            const h = document.createElement("div");
+            h.style.cssText =
+              "grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px;font-weight:700;font-size:13px";
+            h.textContent = "ここから3×3（17〜25）";
+            wrap.append(h);
+          }
+          const label = document.createElement("label");
+          label.style.cssText =
+            "display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)";
+          label.append(document.createTextNode(String(i + 1).padStart(2, "0")));
+          const input = document.createElement("input");
+          input.type = "text";
+          input.maxLength = 60;
+          input.value = task;
+          input.style.cssText =
+            "flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff;color:var(--ink)";
+          label.append(input);
+          wrap.append(label);
+        });
+        document.querySelector("#editDialog").showModal();
+      };
+
+      document.querySelector("#saveTasks").onclick = (e) => {
+        e.preventDefault();
+        const vals = Array.from(
+          document.querySelectorAll("#taskInputs input"),
+        ).map((x) => x.value.trim());
+        if (vals.length !== 25 || vals.some((x) => !x)) {
+          alert("25項目すべて入力してください。");
+          return;
+        }
+        state.tasks = vals;
+        save();
+        document.querySelector("#editDialog").close();
+        toast("日課リストを保存しました。次のカードから反映されます。");
+      };
+
+      document.querySelector("#resetBtn").onclick = () => {
+        if (confirm("今日の25項目の達成とポイントをリセットしますか？")) {
+          state.today.done = [];
+          state.today.earned = [];
+          state.today.points = 0;
+          save();
+          render();
+          toast("今日の記録をリセットしました。");
+        }
+      };
+
+      let rewardDraft = [],
+        rewardDraftActiveId = "";
+
+      function renderRewardEditor() {
+        const wrap = document.querySelector("#rewardInputs");
+        wrap.innerHTML = "";
+        rewardDraft.forEach((r, i) => {
+          const row = document.createElement("div");
+          row.style.cssText =
+            "display:grid;grid-template-columns:auto 1fr 110px auto;gap:8px;align-items:center;margin:8px 0";
+          const radio = document.createElement("input");
+          radio.type = "radio";
+          radio.name = "activeReward";
+          radio.checked = r.id === rewardDraftActiveId;
+          radio.onchange = () => {
+            rewardDraftActiveId = r.id;
+          };
+          radio.value = r.id;
+          const name = document.createElement("input");
+          name.value = r.name;
+          name.maxLength = 60;
+          name.placeholder = "欲しいもの";
+          name.dataset.name = "1";
+          name.style.cssText =
+            "min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px";
+          const price = document.createElement("input");
+          price.type = "number";
+          price.min = "1";
+          price.step = "1";
+          price.value = r.price;
+          price.dataset.price = "1";
+          price.style.cssText =
+            "width:110px;border:1px solid var(--line);border-radius:8px;padding:8px";
+          const del = document.createElement("button");
+          del.type = "button";
+          del.className = "btn secondary";
+          del.textContent = "削除";
+          del.onclick = () => {
+            rewardDraft.splice(i, 1);
+            if (rewardDraftActiveId === r.id)
+              rewardDraftActiveId = rewardDraft[0]?.id || "";
+            renderRewardEditor();
+          };
+          row.append(radio, name, price, del);
+          wrap.append(row);
+        });
+        const add = document.createElement("div");
+        add.style.cssText =
+          "display:grid;grid-template-columns:1fr 110px auto;gap:8px;margin-top:12px";
+        add.innerHTML =
+          '<input id="newRewardName" placeholder="新しいご褒美" maxlength="60" style="min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px"><input id="newRewardPrice" type="number" min="1" step="1" placeholder="金額（円）" style="width:110px;border:1px solid var(--line);border-radius:8px;padding:8px"><button type="button" class="btn secondary" id="addRewardBtn">追加</button>';
+        wrap.append(add);
+        document.querySelector("#addRewardBtn").onclick = () => {
+          const nm = document.querySelector("#newRewardName").value.trim(),
+            price = Number(document.querySelector("#newRewardPrice").value);
+          if (!nm || price <= 0) {
+            toast("ご褒美名と金額を入力してください");
+            return;
+          }
+          const gift = {
+            id: "reward-" + Date.now(),
+            name: nm,
+            price: Math.round(price),
+          };
+          rewardDraft.push(gift);
+          if (!rewardDraftActiveId) rewardDraftActiveId = gift.id;
+          renderRewardEditor();
+        };
+      }
+
+      document.querySelector("#rewardManage").onclick = () => {
+        rewardDraft = state.rewards.map((r) => ({ ...r }));
+        rewardDraftActiveId = state.activeRewardId || "";
+        renderRewardEditor();
+        document.querySelector("#rewardDialog").showModal();
+      };
+
+      document.querySelector("#saveRewards").onclick = (e) => {
+        e.preventDefault();
+        const rows = Array.from(
+          document.querySelector("#rewardInputs").children,
+        ).slice(0, rewardDraft.length);
+        rewardDraft = rewardDraft
+          .map((r, i) => ({
+            id: r.id,
+            name: rows[i].querySelector("[data-name]").value.trim(),
+            price: Math.max(
+              1,
+              Math.round(
+                Number(rows[i].querySelector("[data-price]").value) || 1,
+              ),
+            ),
+          }))
+          .filter((r) => r.name);
+        const selected = document.querySelector(
+          'input[name="activeReward"]:checked',
+        );
+        if (selected) rewardDraftActiveId = selected.value;
+        state.rewards = rewardDraft;
+        state.activeRewardId = state.rewards.some(
+          (r) => r.id === rewardDraftActiveId,
+        )
+          ? rewardDraftActiveId
+          : state.rewards[0]?.id || "";
+        save();
+        render();
+        document.querySelector("#rewardDialog").close();
+        toast("ご褒美リストを保存しました");
+      };
+
+      document.querySelector("#redeemBtn").onclick = () => {
+        const gift = activeReward();
+        if (!gift || totalPoints() < Number(gift.price)) return;
+        if (
+          !confirm(
+            "「" +
+              gift.name +
+              "」を交換済みにして、" +
+              gift.price +
+              "ポイントを使いますか？",
+          )
+        )
+          return;
+        state.today.spent =
+          (Number(state.today.spent) || 0) + Number(gift.price);
+        state.today.redemptions = state.today.redemptions || [];
+        state.today.redemptions.push({
+          name: gift.name,
+          points: Number(gift.price),
+        });
+        save();
+        render();
+        toast(gift.price + "ポイントを使いました");
+      };
+
+      document.querySelector("#quoteRefresh").onclick = () => {
+        document.querySelector("#quoteStatus").textContent =
+          "青空文庫から選んでいます…";
+        if (isGas) {
+          google.script.run
+            .withSuccessHandler((q) => {
+              state.quotes = q;
+              renderQuotes(q);
+              toast("新しい3文にしました。");
+            })
+            .withFailureHandler((e) => {
+              document.querySelector("#quoteStatus").textContent =
+                "取得できませんでした: " +
+                (e && e.message ? e.message : String(e));
+            })
+            .getDailyQuotes(true);
+        } else {
+          // GitHubお試し版 / ローカル用：内蔵コレクションからランダム選出
+          setTimeout(() => {
+            const q = pickQuotes();
+            state.quotes = q;
+            renderQuotes(q);
+            toast("新しい3文にしました。");
+          }, 150);
+        }
+      };
+
+      document.querySelector("#csvBtn").onclick = () => {
+        const all = Object.assign({}, state.history);
+        all[state.today.date] = snapshot(state.today);
+        const rows = Object.values(all).sort((a, b) =>
+            a.date.localeCompare(b.date),
+          ),
+          csv = [
+            [
+              "日付",
+              "達成項目数",
+              "達成率",
+              "達成列数",
+              "獲得ポイント",
+              "使用ポイント",
+              "達成した日課",
+            ].join(","),
+          ];
+        rows.forEach((d) => {
+          const order = d.order || [],
+            done = d.done || [],
+            items = done.map((i) => order[i]).filter(Boolean),
+            cells = [
+              d.date,
+              done.length,
+              order.length
+                ? Math.round((done.length / order.length) * 100) + "%"
+                : "",
+              (d.earned || []).length,
+              Number(d.points) || 0,
+              Number(d.spent) || 0,
+              items.join(" / "),
+            ];
+          csv.push(
+            cells
+              .map((x) => '"' + String(x).replaceAll('"', '""') + '"')
+              .join(","),
+          );
+        });
+        const blob = new Blob(
+            [String.fromCharCode(65279) + csv.join("\r\n")],
+            { type: "text/csv;charset=utf-8" },
+          ),
+          a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "daily-bingo-history.csv";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      };
+
+      document.querySelector("#pointsCsvBtn").onclick = () => {
+        const all = Object.assign({}, state.history);
+        all[state.today.date] = snapshot(state.today);
+        let earned = Number(state.carryPoints) || 0,
+          spent = 0;
+        const csv = [
+          [
+            "日付",
+            "獲得合計",
+            "使用合計",
+            "累計獲得",
+            "累計使用",
+            "使用可能ポイント",
+            "交換内容",
+          ].join(","),
+        ];
+        Object.values(all)
+          .sort((a, b) => a.date.localeCompare(b.date))
+          .forEach((d) => {
+            earned += Number(d.points) || 0;
+            spent += Number(d.spent) || 0;
+            const gifts = (d.redemptions || [])
+                .map((x) => x.name + " (" + x.points + "pt)")
+                .join("、"),
+              cells = [
+                d.date,
+                Number(d.points) || 0,
+                Number(d.spent) || 0,
+                earned,
+                spent,
+                earned - spent,
+                gifts,
+              ];
+            csv.push(
+              cells
+                .map((x) => '"' + String(x).replaceAll('"', '""') + '"')
+                .join(","),
+            );
+          });
+        const blob = new Blob([String.fromCharCode(65279) + csv.join("\r\n")], {
+            type: "text/csv;charset=utf-8",
+          }),
+          a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "daily-bingo-points.csv";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      };
+
+      // 起動
+      boot();
+    </script>
+  </body>
+</html>
